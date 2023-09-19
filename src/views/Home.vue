@@ -28,7 +28,7 @@
       </Row>
     </Card>
     <Row class="margin-top-10">
-      <Table :columns="tableTitle" :height="300" :data="tableData" :loading="tableLoading"></Table>
+      <Table :columns="tableTitle" :width="windowWidth" :height="windowHeight" :data=" tableData" :loading="tableLoading"></Table>
     </Row>
     <Row class="margin-top-10" v-if="content">
       <Input v-model="content" :rows="10" type="textarea" placeholder="Enter something..." />
@@ -38,8 +38,9 @@
   </div>
 </template>
 <script>
-const excel = import('../../libs/excel')
-const XLSX = import('xlsx')
+const XLSX = require('xlsx')
+const excel = require('../../libs/excel')
+
 export default {
   data() {
     return {
@@ -51,7 +52,9 @@ export default {
       tableData: [],
       tableTitle: [],
       tableLoading: false,
-      content: ''
+      content: '',
+      windowWidth: 0,
+      windowHeight: 0
     }
   },
   methods: {
@@ -101,6 +104,7 @@ export default {
       reader.onload = (e) => {
         this.$Message.info('文件读取成功')
         const data = e.target.result
+        console.log(data)
         const {
           header,
           results
@@ -120,6 +124,7 @@ export default {
       // 表格导入
       const fileReader = new FileReader()
       fileReader.onload = (ev) => {
+        console.log(XLSX, 23232)
         try {
           const data = ev.target.result
           const workbook = XLSX.read(data, {
@@ -128,9 +133,11 @@ export default {
           const wsname = workbook.SheetNames[0] // 取第一张表
           const ws = XLSX.utils.sheet_to_json(workbook.Sheets[wsname]) // 生成json表格内容
           this.jsonData = ws
+          console.log(ws, 222)
           this.content = JSON.stringify(ws)
           return true
         } catch (e) {
+          console.log(e)
           return false
         }
       }
@@ -168,7 +175,8 @@ export default {
 
   },
   mounted() {
-
+    this.windowWidth = document.documentElement.clientWidth
+    this.windowHeight = document.documentElement.clientHeight - 480
   }
 }
 </script>
